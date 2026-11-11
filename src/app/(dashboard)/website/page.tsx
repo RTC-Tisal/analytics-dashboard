@@ -1,7 +1,10 @@
 import { Suspense } from "react";
+import Card from "@/components/Card";
+import SessionsOverTimeChart from "@/components/charts/SessionsOverTimeChart";
+import TrafficByChannelChart from "@/components/charts/TrafficByChannelChart";
 import DateRangeFilter from "@/components/DateRangeFilter";
 import KpiTile from "@/components/KpiTile";
-import PlaceholderCard from "@/components/PlaceholderCard";
+import TopLandingPagesTable from "@/components/TopLandingPagesTable";
 import { parseDateRange } from "@/lib/dateRange";
 import type { ValueFormat } from "@/lib/format";
 import { getWebsiteData } from "@/lib/website/data";
@@ -28,24 +31,12 @@ export default function WebsitePage(props: PageProps<"/website">) {
       <Suspense fallback={<LoadingTiles />}>
         <WebsiteContent searchParams={props.searchParams} />
       </Suspense>
-
-      {/* Empty cards for module 2. Outside <Suspense> because they don't use ?range= yet.
-          Sessions over time is full width; the other two sit side by side on wide screens. */}
-      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <PlaceholderCard
-          title="Sessions over time"
-          note="Coming in module 2"
-          className="xl:col-span-2"
-        />
-        <PlaceholderCard title="Traffic by channel" note="Coming in module 2" />
-        <PlaceholderCard title="Top landing pages" note="Coming in module 2" />
-      </div>
     </div>
   );
 }
 
 // Reads ?range= from the URL, loads the data for that range, and shows the
-// filter and the tiles.
+// filter, the tiles and the cards below them.
 async function WebsiteContent({
   searchParams,
 }: Pick<PageProps<"/website">, "searchParams">) {
@@ -71,6 +62,22 @@ async function WebsiteContent({
           />
         ))}
       </div>
+
+      {/* The server passes the daily series to the chart as a prop.
+          The chart itself runs in the browser too ("use client"), for hover and resizing. */}
+      <Card title="Sessions over time" className="mt-6">
+        <SessionsOverTimeChart data={data.daily} />
+      </Card>
+
+      {/* Side by side on wide screens (xl), stacked on smaller ones. */}
+      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <Card title="Traffic by channel">
+          <TrafficByChannelChart data={data.trafficByChannel} />
+        </Card>
+        <Card title="Top landing pages">
+          <TopLandingPagesTable rows={data.topLandingPages} />
+        </Card>
+      </div>
     </>
   );
 }
@@ -82,8 +89,14 @@ function LoadingTiles() {
       <div className="mt-6 h-10 w-80 animate-pulse rounded-lg bg-gray-100" />
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.key} className="h-32 animate-pulse rounded-lg bg-gray-100" />
+          <div key={tile.key} className="h-[142px] animate-pulse rounded-lg bg-gray-100" />
         ))}
+      </div>
+      {/* Same heights as the real cards (measured in the browser), so nothing jumps when they load. */}
+      <div className="mt-6 h-[330px] animate-pulse rounded-lg bg-gray-100" />
+      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="h-[476px] animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-[476px] animate-pulse rounded-lg bg-gray-100" />
       </div>
     </div>
   );

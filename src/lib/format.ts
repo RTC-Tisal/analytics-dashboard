@@ -19,6 +19,32 @@ const oneDecimal = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
+// Dates arrive as "YYYY-MM-DD" text. JavaScript reads that as midnight UTC, so we
+// also format in UTC. Otherwise, in a time zone behind UTC, "2026-11-03" could
+// show as Nov 2.
+const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+const longDateFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+// "2026-11-03" → "Nov 3" (chart axes)
+export function formatShortDate(isoDate: string): string {
+  return shortDateFormatter.format(new Date(isoDate));
+}
+
+// "2026-11-03" → "Tue, Nov 3" (tooltips)
+export function formatLongDate(isoDate: string): string {
+  return longDateFormatter.format(new Date(isoDate));
+}
+
 // Format a KPI value for display.
 export function formatValue(value: number, format: ValueFormat): string {
   return format === "percent"
