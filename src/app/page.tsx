@@ -1,10 +1,6 @@
+import { redirect } from "next/navigation";
+
+// The home page has no content of its own: send visitors to the first section.
 export default function Home() {
-  return (
-    <main className="p-10">
-      <h1 className="text-3xl font-bold">Rootcode Dashboard</h1>
-      <p className="mt-2 text-gray-500">
-        Website · Prospecting · Pipeline · Social
-      </p>
-    </main>
-  );
+  redirect("/website");
 }
