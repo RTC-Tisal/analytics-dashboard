@@ -1,22 +1,39 @@
+import {
+  Activity,
+  ChartLine,
+  FileText,
+  Gauge,
+  MousePointerClick,
+  Send,
+  Signpost,
+  type LucideIcon,
+} from "lucide-react";
 import { Suspense } from "react";
 import Card from "@/components/Card";
 import SessionsOverTimeChart from "@/components/charts/SessionsOverTimeChart";
 import TrafficByChannelChart from "@/components/charts/TrafficByChannelChart";
 import DateRangeFilter from "@/components/DateRangeFilter";
+import FilterBar from "@/components/FilterBar";
 import KpiTile from "@/components/KpiTile";
+import PageHeader from "@/components/PageHeader";
 import TopLandingPagesTable from "@/components/TopLandingPagesTable";
 import { parseDateRange } from "@/lib/dateRange";
 import type { ValueFormat } from "@/lib/format";
-import { getWebsiteData } from "@/lib/website/data";
+import { getWebsiteData, websiteDataSource } from "@/lib/website/data";
 import type { WebsiteKpis } from "@/lib/website/types";
 
-// The tiles to show, in order. Labels and formats live here, on the page;
+// The tiles to show, in order. Labels, icons and formats live here, on the page;
 // the data function only returns numbers.
-const tiles: { key: keyof WebsiteKpis; label: string; format: ValueFormat }[] = [
-  { key: "sessions", label: "Sessions", format: "number" },
-  { key: "engagedSessions", label: "Engaged sessions", format: "number" },
-  { key: "engagementRate", label: "Engagement rate", format: "percent" },
-  { key: "formSubmissions", label: "Form submissions", format: "number" },
+const tiles: {
+  key: keyof WebsiteKpis;
+  label: string;
+  icon: LucideIcon;
+  format: ValueFormat;
+}[] = [
+  { key: "sessions", label: "Sessions", icon: MousePointerClick, format: "number" },
+  { key: "engagedSessions", label: "Engaged sessions", icon: Activity, format: "number" },
+  { key: "engagementRate", label: "Engagement rate", icon: Gauge, format: "percent" },
+  { key: "formSubmissions", label: "Form submissions", icon: Send, format: "number" },
 ];
 
 // The page itself. The heading never changes, so Next.js can prepare it ahead
@@ -25,8 +42,11 @@ const tiles: { key: keyof WebsiteKpis; label: string; format: ValueFormat }[] = 
 export default function WebsitePage(props: PageProps<"/website">) {
   return (
     <div>
-      <h2 className="text-2xl font-bold">Website</h2>
-      <p className="mt-1 text-gray-500">Traffic and conversions from GA4.</p>
+      <PageHeader
+        title="Website"
+        description="Traffic and conversions from GA4."
+        dataSource={websiteDataSource}
+      />
 
       <Suspense fallback={<LoadingTiles />}>
         <WebsiteContent searchParams={props.searchParams} />
@@ -44,11 +64,21 @@ async function WebsiteContent({
   const range = parseDateRange(rawRange); // always a valid DateRange
   const data = await getWebsiteData(range);
 
+  // Daily values for each tile's sparkline, built from the daily series with .map().
+  // Form submissions aren't in the daily series yet, so that tile gets no sparkline.
+  const trends: Partial<Record<keyof WebsiteKpis, number[]>> = {
+    sessions: data.daily.map((day) => day.sessions),
+    engagedSessions: data.daily.map((day) => day.engagedSessions),
+    engagementRate: data.daily.map((day) =>
+      day.sessions === 0 ? 0 : day.engagedSessions / day.sessions,
+    ),
+  };
+
   return (
     <>
-      <div className="mt-6">
+      <FilterBar>
         <DateRangeFilter pathname="/website" selected={range} />
-      </div>
+      </FilterBar>
 
       {/* 1 column on phones, 2 from tablet width (md), 4 on wide screens (xl). */}
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -56,25 +86,27 @@ async function WebsiteContent({
           <KpiTile
             key={tile.key}
             label={tile.label}
+            icon={tile.icon}
             current={data.kpis[tile.key].current}
             previous={data.kpis[tile.key].previous}
             format={tile.format}
+            trend={trends[tile.key]}
           />
         ))}
       </div>
 
       {/* The server passes the daily series to the chart as a prop.
           The chart itself runs in the browser too ("use client"), for hover and resizing. */}
-      <Card title="Sessions over time" className="mt-6">
+      <Card title="Sessions over time" icon={ChartLine} className="mt-6">
         <SessionsOverTimeChart data={data.daily} />
       </Card>
 
       {/* Side by side on wide screens (xl), stacked on smaller ones. */}
       <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Card title="Traffic by channel">
+        <Card title="Traffic by channel" icon={Signpost}>
           <TrafficByChannelChart data={data.trafficByChannel} />
         </Card>
-        <Card title="Top landing pages">
+        <Card title="Top landing pages" icon={FileText}>
           <TopLandingPagesTable rows={data.topLandingPages} />
         </Card>
       </div>
@@ -86,17 +118,17 @@ async function WebsiteContent({
 function LoadingTiles() {
   return (
     <div aria-hidden="true">
-      <div className="mt-6 h-10 w-80 animate-pulse rounded-lg bg-gray-100" />
+      <div className="mt-6 h-[54px] w-80 animate-pulse rounded-lg bg-gray-100" />
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.key} className="h-[142px] animate-pulse rounded-lg bg-gray-100" />
+          <div key={tile.key} className="h-[210px] animate-pulse rounded-lg bg-gray-100" />
         ))}
       </div>
       {/* Same heights as the real cards (measured in the browser), so nothing jumps when they load. */}
-      <div className="mt-6 h-[330px] animate-pulse rounded-lg bg-gray-100" />
+      <div className="mt-6 h-[342px] animate-pulse rounded-lg bg-gray-100" />
       <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="h-[476px] animate-pulse rounded-lg bg-gray-100" />
-        <div className="h-[476px] animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-[504px] animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-[504px] animate-pulse rounded-lg bg-gray-100" />
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
+import type { DataSource } from "@/lib/dataSource";
 import { DAYS_IN_RANGE, type DateRange } from "@/lib/dateRange";
+import { ONE_DAY_MS, SAMPLE_TODAY_MS, stableNoise } from "@/lib/sampleData";
 import type {
   ChannelSessions,
   DailyTraffic,
@@ -19,10 +21,13 @@ import type {
 //      for the same number of days just before it (the previous period).
 //   3. Channels and landing pages split the Sessions total, so everything agrees.
 
+// Made-up numbers, so the Website page shows a "Sample data" badge.
+// Change to "live" in Module 3, when getWebsiteData() returns real GA4 data.
+export const websiteDataSource: DataSource = "sample";
+
 // The made-up period always ends on this day. A fixed date (not "today") keeps
 // the numbers the same on every refresh. Real dates arrive with GA4 in Module 3.
-const MADE_UP_END_DATE = Date.UTC(2026, 10, 10); // 10 Nov 2026 (months count from 0)
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const MADE_UP_END_DATE = SAMPLE_TODAY_MS; // 10 Nov 2026, shared with the other pages' sample data
 
 // Form submissions are not part of the daily series, so their totals stay typed.
 // The 28-day range drops on purpose, so we can check how a decrease looks.
@@ -73,14 +78,6 @@ const TOP_LANDING_PAGES = 10;
 // ---------------------------------------------------------------------------
 // Daily series
 // ---------------------------------------------------------------------------
-
-// A "random-looking" number between 0 and 1 that is always the same for the
-// same seed. Unlike Math.random(), stableNoise(42) returns the same value on
-// every call, so the made-up numbers never change between refreshes.
-function stableNoise(seed: number): number {
-  const x = Math.sin(seed * 12.9898) * 43758.5453;
-  return x - Math.floor(x); // keep only the part after the decimal point
-}
 
 // Made-up traffic for one day, worked out from the date alone.
 function madeUpDay(dayMs: number): DailyTraffic {
