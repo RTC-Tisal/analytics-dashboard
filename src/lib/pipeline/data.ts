@@ -1,4 +1,4 @@
-import type { DataSource } from "@/lib/dataSource";
+import type { DataSource, DataStatus } from "@/lib/dataSource";
 import { DAYS_IN_RANGE, type DateRange } from "@/lib/dateRange";
 import { SAMPLE_REPS, type SalesRep } from "@/lib/salesReps";
 import { ONE_DAY_MS, SAMPLE_TODAY_MS } from "@/lib/sampleData";
@@ -15,6 +15,13 @@ import type {
 // Sample deals, so the Pipeline page shows a "Sample data" badge.
 // Change to "live" when fetchDeals() returns real HubSpot data.
 export const pipelineDataSource: DataSource = "sample";
+
+// For the status line under the page title. While live data isn't connected this is
+// always "sample". When it is: read the newest synced_at from BigQuery for lastUpdated.
+export async function getPipelineStatus(): Promise<DataStatus> {
+  if (pipelineDataSource === "sample") return { source: "sample" };
+  return { source: "live", lastUpdated: null };
+}
 
 // "Today" for the sample data. Real data will use the actual date.
 const TODAY_MS = SAMPLE_TODAY_MS;

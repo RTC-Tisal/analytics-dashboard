@@ -88,6 +88,25 @@ export function formatLongDate(isoDate: string): string {
   return longDateFormatter.format(new Date(isoDate));
 }
 
+// Times are shown in Rootcode's time zone, not the server's: Cloud Run runs on UTC,
+// so without this every "last updated" time would be 5½ hours off.
+export const DISPLAY_TIME_ZONE = "Asia/Colombo";
+
+const updatedAtFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: DISPLAY_TIME_ZONE,
+  timeZoneName: "short",
+});
+
+// "2026-11-16T07:02:00Z" → "Nov 16, 2026, 12:32 PM GMT+5:30" (when data was last updated)
+export function formatUpdatedAt(isoTimestamp: string): string {
+  return updatedAtFormatter.format(new Date(isoTimestamp));
+}
+
 // Format a KPI value for display. null (a rate that can't be calculated) → "—".
 export function formatValue(value: number | null, format: ValueFormat): string {
   if (value === null) return NO_VALUE;

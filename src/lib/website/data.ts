@@ -1,4 +1,4 @@
-import type { DataSource } from "@/lib/dataSource";
+import type { DataSource, DataStatus } from "@/lib/dataSource";
 import { DAYS_IN_RANGE, type DateRange } from "@/lib/dateRange";
 import { ONE_DAY_MS, SAMPLE_TODAY_MS, stableNoise } from "@/lib/sampleData";
 import type {
@@ -24,6 +24,13 @@ import type {
 // Made-up numbers, so the Website page shows a "Sample data" badge.
 // Change to "live" in Module 3, when getWebsiteData() returns real GA4 data.
 export const websiteDataSource: DataSource = "sample";
+
+// For the status line under the page title. While live data isn't connected this is
+// always "sample". When it is: read the newest synced_at from BigQuery for lastUpdated.
+export async function getWebsiteStatus(): Promise<DataStatus> {
+  if (websiteDataSource === "sample") return { source: "sample" };
+  return { source: "live", lastUpdated: null };
+}
 
 // The made-up period always ends on this day. A fixed date (not "today") keeps
 // the numbers the same on every refresh. Real dates arrive with GA4 in Module 3.

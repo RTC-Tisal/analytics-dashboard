@@ -1,5 +1,5 @@
 import PageHeader from "@/components/PageHeader";
-import { pipelineDataSource } from "@/lib/pipeline/data";
+import { getPipelineStatus } from "@/lib/pipeline/data";
 
 export default function PipelinePage() {
   return (
@@ -7,7 +7,7 @@ export default function PipelinePage() {
       <PageHeader
         title="Pipeline"
         description="Deals and revenue from HubSpot."
-        dataSource={pipelineDataSource}
+        status={getPipelineStatus()}
       />
     </div>
   );

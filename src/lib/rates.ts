@@ -73,3 +73,11 @@ export const leadToDealRate = (c: { deals: number; leads: number }) => ratio(c.d
 
 // Deal win rate: deals won ÷ deals created (in the same period, so not the same deals).
 export const dealWinRate = (c: { wonDeals: number; deals: number }) => ratio(c.wonDeals, c.deals);
+
+// ---------------------------------------------------------------------------
+// Pipeline (HubSpot)
+// ---------------------------------------------------------------------------
+
+// Win rate of closed deals: won ÷ (won + lost). "Of the deals that closed, how many did we win?"
+// null when nothing closed: no closed deals means "no win rate yet", NOT "we lost everything" (0%).
+export const closedDealWinRate = (c: { won: number; lost: number }) => ratio(c.won, c.won + c.lost);

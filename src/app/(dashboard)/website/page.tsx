@@ -15,11 +15,12 @@ import TrafficByChannelChart from "@/components/charts/TrafficByChannelChart";
 import DateRangeFilter from "@/components/DateRangeFilter";
 import FilterBar from "@/components/FilterBar";
 import KpiTile from "@/components/KpiTile";
+import type { KpiDefinitionId } from "@/lib/kpiDefinitions";
 import PageHeader from "@/components/PageHeader";
 import TopLandingPagesTable from "@/components/TopLandingPagesTable";
 import { parseDateRange } from "@/lib/dateRange";
 import type { ValueFormat } from "@/lib/format";
-import { getWebsiteData, websiteDataSource } from "@/lib/website/data";
+import { getWebsiteData, getWebsiteStatus } from "@/lib/website/data";
 import type { WebsiteKpis } from "@/lib/website/types";
 
 // The tiles to show, in order. Labels, icons and formats live here, on the page;
@@ -27,13 +28,14 @@ import type { WebsiteKpis } from "@/lib/website/types";
 const tiles: {
   key: keyof WebsiteKpis;
   label: string;
+  definition: KpiDefinitionId; // text for the ⓘ icon, from src/lib/kpiDefinitions.ts
   icon: LucideIcon;
   format: ValueFormat;
 }[] = [
-  { key: "sessions", label: "Sessions", icon: MousePointerClick, format: "number" },
-  { key: "engagedSessions", label: "Engaged sessions", icon: Activity, format: "number" },
-  { key: "engagementRate", label: "Engagement rate", icon: Gauge, format: "percent" },
-  { key: "formSubmissions", label: "Form submissions", icon: Send, format: "number" },
+  { key: "sessions", label: "Sessions", definition: "websiteSessions", icon: MousePointerClick, format: "number" },
+  { key: "engagedSessions", label: "Engaged sessions", definition: "websiteEngagedSessions", icon: Activity, format: "number" },
+  { key: "engagementRate", label: "Engagement rate", definition: "websiteEngagementRate", icon: Gauge, format: "percent" },
+  { key: "formSubmissions", label: "Form submissions", definition: "websiteFormSubmissions", icon: Send, format: "number" },
 ];
 
 // The page itself. The heading never changes, so Next.js can prepare it ahead
@@ -45,7 +47,7 @@ export default function WebsitePage(props: PageProps<"/website">) {
       <PageHeader
         title="Website"
         description="Traffic and conversions from GA4."
-        dataSource={websiteDataSource}
+        status={getWebsiteStatus()}
       />
 
       <Suspense fallback={<LoadingTiles />}>
@@ -86,6 +88,7 @@ async function WebsiteContent({
           <KpiTile
             key={tile.key}
             label={tile.label}
+            definition={tile.definition}
             icon={tile.icon}
             current={data.kpis[tile.key].current}
             previous={data.kpis[tile.key].previous}

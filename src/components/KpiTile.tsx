@@ -1,10 +1,13 @@
 import { ArrowDownRight, ArrowUpRight, Minus, type LucideIcon } from "lucide-react";
 import Card from "@/components/Card";
+import InfoTip from "@/components/InfoTip";
 import Sparkline from "@/components/charts/Sparkline";
 import { formatChange, formatValue, type ValueFormat } from "@/lib/format";
+import { KPI_DEFINITIONS, type KpiDefinitionId } from "@/lib/kpiDefinitions";
 
 interface KpiTileProps {
   label: string; // e.g. "Sessions"
+  definition: KpiDefinitionId; // which text from src/lib/kpiDefinitions.ts the ⓘ icon shows
   icon: LucideIcon; // e.g. MousePointerClick, shown next to the label
   current: number | null; // value for the selected period; null = can't be calculated (shows "—")
   previous: number | null; // value for the period before it
@@ -18,9 +21,10 @@ interface KpiTileProps {
   note?: string; // optional small print under the change, e.g. which filters don't apply
 }
 
-// One KPI card: icon + label, big value, the change as a pill, a sparkline, and a note.
+// One KPI card: icon + label + ⓘ definition, big value, the change as a pill, a sparkline, and a note.
 export default function KpiTile({
   label,
+  definition,
   icon,
   current,
   previous,
@@ -33,7 +37,13 @@ export default function KpiTile({
   const showTrend = trend !== undefined && trend.length > 1 && trend.some((value) => value !== 0);
 
   return (
-    <Card title={label} icon={icon}>
+    <Card
+      title={label}
+      icon={icon}
+      titleExtra={
+        <InfoTip id={`kpi-definition-${definition}`} label={label} text={KPI_DEFINITIONS[definition]} />
+      }
+    >
       <p className="text-3xl font-semibold tracking-tight tabular-nums text-gray-900">
         {formatValue(current, format)}
       </p>

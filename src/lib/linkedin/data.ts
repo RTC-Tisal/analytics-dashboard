@@ -1,4 +1,4 @@
-import type { DataSource } from "@/lib/dataSource";
+import type { DataSource, DataStatus } from "@/lib/dataSource";
 import { DAYS_IN_RANGE, type DateRange } from "@/lib/dateRange";
 import { ONE_DAY_MS, SAMPLE_TODAY_MS, isoDate } from "@/lib/sampleData";
 import { SAMPLE_AD_ANALYTICS, SAMPLE_AUDIENCE, SAMPLE_CAMPAIGNS, SAMPLE_CAMPAIGN_GROUPS } from "./sampleAds";
@@ -40,6 +40,13 @@ import type {
 // Sample numbers, so the LinkedIn page shows a "Sample data" badge.
 // Change to "live" when the fetch functions below return real data.
 export const linkedinDataSource: DataSource = "sample";
+
+// For the status line under the page title. While live data isn't connected this is
+// always "sample". When it is: read the newest synced_at from BigQuery for lastUpdated.
+export async function getLinkedInStatus(): Promise<DataStatus> {
+  if (linkedinDataSource === "sample") return { source: "sample" };
+  return { source: "live", lastUpdated: null };
+}
 
 // "Today" for the sample data. Real data will use the actual date.
 const TODAY_MS = SAMPLE_TODAY_MS;

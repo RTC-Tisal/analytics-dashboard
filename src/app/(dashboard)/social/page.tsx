@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
-import { socialDataSource } from "@/lib/social/data";
+import { getSocialStatus } from "@/lib/social/data";
 
 export default function SocialPage() {
   return (
@@ -9,7 +9,7 @@ export default function SocialPage() {
       <PageHeader
         title="Social"
         description="Reach and engagement on Instagram, Facebook and YouTube."
-        dataSource={socialDataSource}
+        status={getSocialStatus()}
       >
         {/* LinkedIn isn't on this page: it has its own, with ads and Company Page together.
             min-h-11 (44px) keeps the link easy to tap on a phone. */}

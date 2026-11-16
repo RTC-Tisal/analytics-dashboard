@@ -27,7 +27,7 @@ import PageHeader from "@/components/PageHeader";
 import SelectFilter from "@/components/SelectFilter";
 import { parseDateRange } from "@/lib/dateRange";
 import { formatTableDate, formatValue } from "@/lib/format";
-import { getLinkedInData, linkedinDataSource } from "@/lib/linkedin/data";
+import { getLinkedInData, getLinkedInStatus } from "@/lib/linkedin/data";
 import type { AudienceItem, FollowerSegment, LinkedInData, PostRow } from "@/lib/linkedin/types";
 import { clickThroughRate, costPerLead, engagementRate, ratio } from "@/lib/rates";
 
@@ -39,7 +39,7 @@ export default function LinkedInPage(props: PageProps<"/linkedin">) {
       <PageHeader
         title="LinkedIn"
         description="Campaign Manager ads and Company Page analytics."
-        dataSource={linkedinDataSource}
+        status={getLinkedInStatus()}
       />
 
       <Suspense fallback={<LoadingTop />}>
@@ -86,6 +86,7 @@ async function LinkedInContent({ searchParams }: Pick<PageProps<"/linkedin">, "s
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiTile
           label="Ad spend"
+          definition="linkedinAdSpend"
           icon={Wallet}
           format="currency"
           better="neither" // spending more or less isn't good or bad by itself: grey pill
@@ -95,6 +96,7 @@ async function LinkedInContent({ searchParams }: Pick<PageProps<"/linkedin">, "s
         />
         <KpiTile
           label="Leads"
+          definition="linkedinLeads"
           icon={UserPlus}
           format="number"
           current={ads.current.leadFormSubmissions}
@@ -104,6 +106,7 @@ async function LinkedInContent({ searchParams }: Pick<PageProps<"/linkedin">, "s
         />
         <KpiTile
           label="Cost per lead"
+          definition="linkedinCostPerLead"
           icon={BadgeDollarSign}
           format="currency"
           better="down" // a lower cost per lead is good news: green when it drops
@@ -112,6 +115,7 @@ async function LinkedInContent({ searchParams }: Pick<PageProps<"/linkedin">, "s
         />
         <KpiTile
           label="Pipeline from LinkedIn"
+          definition="linkedinPipeline"
           icon={HandCoins}
           format="currency"
           current={pipeline.current}
@@ -120,6 +124,7 @@ async function LinkedInContent({ searchParams }: Pick<PageProps<"/linkedin">, "s
         />
         <KpiTile
           label="Followers gained"
+          definition="linkedinFollowersGained"
           icon={Users}
           format="number"
           current={data.organic.totals.current.followersGained}
@@ -173,6 +178,7 @@ function AdsToRevenue({ funnel }: { funnel: LinkedInData["paidFunnel"] }) {
         </Card>
         <KpiTile
           label="Pipeline from LinkedIn ads"
+          definition="linkedinPipelineFromAds"
           icon={HandCoins}
           format="currency"
           current={funnel.current.pipelineValue}

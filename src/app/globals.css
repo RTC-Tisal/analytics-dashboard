@@ -31,6 +31,8 @@
   --color-sample: #92400e; /* amber-800 */
   --color-sample-soft: #fffbeb; /* amber-50 */
   --color-sample-border: #fde68a; /* amber-200 */
+  /* Warnings (e.g. data that may be out of date). Same amber as sample, separate name for its own job. */
+  --color-warning: #92400e; /* amber-800 */
 
   --color-background: #f5f7fb; /* page background: light grey-blue so white cards stand out */
   --color-foreground: #0f172a; /* slate-900: main text */

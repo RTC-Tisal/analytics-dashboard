@@ -1,8 +1,8 @@
 import { FlaskConical } from "lucide-react";
 
 // A small amber pill that says "Sample data", so screenshots of a page with
-// made-up numbers are never mistaken for real ones. PageHeader shows it
-// automatically when a page's data source is "sample".
+// made-up numbers are never mistaken for real ones. The status line under each
+// page title (DataStatusLine) shows it when a page's data source is "sample".
 export default function SampleDataBadge() {
   return (
     <span
