@@ -17,6 +17,16 @@ export const KPI_DEFINITIONS = {
   websiteFormSubmissions:
     "Contact and enquiry forms sent from the website. Source: GA4.",
 
+  // Search (Google Search Console)
+  searchClicks:
+    "Clicks from Google search results to our website. Source: Google Search Console.",
+  searchImpressions:
+    "Times one of our pages appeared in someone's Google search results, whether or not they scrolled to it. Source: Google Search Console.",
+  searchClickThroughRate:
+    "Search clicks divided by impressions: the share of people who saw us in Google and clicked.",
+  searchAveragePosition:
+    "Where our pages ranked in Google on average, weighted by impressions. 1 is the top result; lower is better.",
+
   // LinkedIn (Campaign Manager, Company Page, HubSpot)
   linkedinAdSpend:
     "Money spent on LinkedIn ads in this period, for the selected campaign group. Source: Campaign Manager.",

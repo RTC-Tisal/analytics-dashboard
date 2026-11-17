@@ -81,3 +81,31 @@ export const dealWinRate = (c: { wonDeals: number; deals: number }) => ratio(c.w
 // Win rate of closed deals: won ÷ (won + lost). "Of the deals that closed, how many did we win?"
 // null when nothing closed: no closed deals means "no win rate yet", NOT "we lost everything" (0%).
 export const closedDealWinRate = (c: { won: number; lost: number }) => ratio(c.won, c.won + c.lost);
+
+// ---------------------------------------------------------------------------
+// Search (Google Search Console)
+// ---------------------------------------------------------------------------
+
+// Search click-through rate: use clickThroughRate above (clicks ÷ impressions, same formula).
+
+// Average position across many rows (days, queries, countries…), weighted by impressions:
+// (position × impressions, added up) ÷ total impressions. Each appearance in Google counts once,
+// so 1,000 appearances at #1 outweigh 10 at #50. A plain average of the rows would say 25.5;
+// this says 1.49, which is also how Search Console itself calculates it. 1 = top, lower is better.
+// null when there are no impressions (nothing appeared, so there's no position).
+export function averagePosition(rows: readonly { position: number; impressions: number }[]): number | null {
+  let impressions = 0;
+  let weightedPositions = 0;
+  for (const row of rows) {
+    impressions += row.impressions;
+    weightedPositions += row.position * row.impressions;
+  }
+  return ratio(weightedPositions, impressions);
+}
+
+// Missed clicks: how many more clicks a page would have had at a benchmark CTR
+// (e.g. the site's average). impressions × benchmark − clicks, rounded, never below 0.
+// Used to rank "opportunities": lots of impressions at a below-average CTR.
+export function missedClicks(c: { clicks: number; impressions: number }, benchmarkCtr: number): number {
+  return Math.max(0, Math.round(c.impressions * benchmarkCtr - c.clicks));
+}

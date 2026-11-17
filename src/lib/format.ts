@@ -5,7 +5,8 @@
 //   "number"   → a count, e.g. 14860 → "14,860"
 //   "percent"  → a fraction, e.g. 0.633 → "63.3%"
 //   "currency" → money, e.g. 8142.36 → "$8,142"; 193.874 → "$193.87"
-export type ValueFormat = "number" | "percent" | "currency";
+//   "decimal"  → a number with one decimal, e.g. average search position 14.63 → "14.6"
+export type ValueFormat = "number" | "percent" | "currency" | "decimal";
 
 // The dashboard's currency. USD for now (an open decision, see CLAUDE.md):
 // change it here and every amount on every page follows.
@@ -113,6 +114,7 @@ export function formatValue(value: number | null, format: ValueFormat): string {
   if (format === "percent") {
     return value !== 0 && Math.abs(value) < 0.01 ? smallPercentFormatter.format(value) : percentFormatter.format(value);
   }
+  if (format === "decimal") return oneDecimal.format(value);
   if (format === "currency") {
     return Math.abs(value) >= 1000
       ? wholeCurrencyFormatter.format(value)
@@ -124,6 +126,7 @@ export function formatValue(value: number | null, format: ValueFormat): string {
 // Format the size of a change (always positive: the arrow shows the direction).
 //   counts and money → relative change:   14860 vs 13920 → "6.8%"
 //   rates            → difference in points: 0.633 vs 0.620 → "1.3 pp"
+//   decimals         → plain difference:     14.6 vs 15.4 → "0.8" (e.g. positions)
 export function formatChange(
   current: number,
   previous: number,
@@ -133,6 +136,7 @@ export function formatChange(
     const points = Math.abs(current - previous) * 100;
     return `${oneDecimal.format(points)} pp`;
   }
+  if (format === "decimal") return oneDecimal.format(Math.abs(current - previous));
   const relative = Math.abs(current - previous) / previous;
   return percentFormatter.format(relative);
 }

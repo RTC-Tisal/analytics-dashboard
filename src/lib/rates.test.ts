@@ -12,6 +12,7 @@
 
 import { describe, expect, test } from "vitest";
 import {
+  averagePosition,
   clickThroughRate,
   closedDealWinRate,
   costPerClick,
@@ -21,6 +22,7 @@ import {
   engagementRate,
   leadFormConversionRate,
   leadToDealRate,
+  missedClicks,
   pipelinePerAdSpend,
   ratio,
   websiteConversionRate,
@@ -154,5 +156,49 @@ describe("closed deal win rate (Pipeline): won ÷ (won + lost)", () => {
 
   test("only won deals is 100%", () => {
     expect(closedDealWinRate({ won: 5, lost: 0 })).toBe(1);
+  });
+});
+
+describe("average position (Search Console): weighted by impressions", () => {
+  test("1,000 appearances at #1 and 10 at #50 average to 1.49, not 25.5", () => {
+    const rows = [
+      { position: 1, impressions: 1000 },
+      { position: 50, impressions: 10 },
+    ];
+    expect(averagePosition(rows)).toBeCloseTo(1.485, 3); // (1×1,000 + 50×10) ÷ 1,010 = 1,500 ÷ 1,010
+  });
+
+  test("equal impressions give the plain average", () => {
+    const rows = [
+      { position: 2, impressions: 100 },
+      { position: 6, impressions: 100 },
+    ];
+    expect(averagePosition(rows)).toBe(4);
+  });
+
+  test("one row gives that row's position", () => {
+    expect(averagePosition([{ position: 7.3, impressions: 42 }])).toBeCloseTo(7.3); // 7.3 × 42 ÷ 42 = 7.2999… in JavaScript
+  });
+
+  test("no rows is null", () => {
+    expect(averagePosition([])).toBe(null);
+  });
+
+  test("rows with zero impressions are null, not 0 (0 would mean 'better than #1')", () => {
+    expect(averagePosition([{ position: 3, impressions: 0 }])).toBe(null);
+  });
+});
+
+describe("missed clicks vs a benchmark CTR (Search opportunities)", () => {
+  test("1,000 impressions at 1% instead of a 3% benchmark: 20 clicks missed", () => {
+    expect(missedClicks({ clicks: 10, impressions: 1000 }, 0.03)).toBe(20);
+  });
+
+  test("a page doing better than the benchmark missed nothing (0, never negative)", () => {
+    expect(missedClicks({ clicks: 50, impressions: 1000 }, 0.03)).toBe(0);
+  });
+
+  test("no impressions: nothing missed", () => {
+    expect(missedClicks({ clicks: 0, impressions: 0 }, 0.03)).toBe(0);
   });
 });

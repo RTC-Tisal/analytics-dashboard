@@ -17,8 +17,10 @@ import FilterBar from "@/components/FilterBar";
 import KpiTile from "@/components/KpiTile";
 import type { KpiDefinitionId } from "@/lib/kpiDefinitions";
 import PageHeader from "@/components/PageHeader";
+import SearchSection, { SearchSectionLoading } from "@/components/SearchSection";
 import TopLandingPagesTable from "@/components/TopLandingPagesTable";
 import { parseDateRange } from "@/lib/dateRange";
+import { parseTermsFilter } from "@/lib/searchConsole/data";
 import type { ValueFormat } from "@/lib/format";
 import { getWebsiteData, getWebsiteStatus } from "@/lib/website/data";
 import type { WebsiteKpis } from "@/lib/website/types";
@@ -46,12 +48,17 @@ export default function WebsitePage(props: PageProps<"/website">) {
     <div>
       <PageHeader
         title="Website"
-        description="Traffic and conversions from GA4."
+        description="Traffic and conversions from GA4, and how we show up in Google search."
         status={getWebsiteStatus()}
       />
 
       <Suspense fallback={<LoadingTiles />}>
         <WebsiteContent searchParams={props.searchParams} />
+      </Suspense>
+
+      {/* Search Console data, in its own <Suspense>: it loads (and could fail) separately from GA4. */}
+      <Suspense fallback={<SearchSectionLoading />}>
+        <SearchSection searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
@@ -62,8 +69,11 @@ export default function WebsitePage(props: PageProps<"/website">) {
 async function WebsiteContent({
   searchParams,
 }: Pick<PageProps<"/website">, "searchParams">) {
-  const { range: rawRange } = await searchParams; // e.g. "7d", or undefined
+  const { range: rawRange, terms: rawTerms } = await searchParams; // e.g. "7d", or undefined
   const range = parseDateRange(rawRange); // always a valid DateRange
+  // The Search section's All / Brand / Non-brand choice: the date buttons keep it in the URL.
+  const terms = parseTermsFilter(rawTerms);
+  const keep: Record<string, string> = terms === "all" ? {} : { terms };
   const data = await getWebsiteData(range);
 
   // Daily values for each tile's sparkline, built from the daily series with .map().
@@ -79,7 +89,7 @@ async function WebsiteContent({
   return (
     <>
       <FilterBar>
-        <DateRangeFilter pathname="/website" selected={range} />
+        <DateRangeFilter pathname="/website" selected={range} keep={keep} />
       </FilterBar>
 
       {/* 1 column on phones, 2 from tablet width (md), 4 on wide screens (xl). */}

@@ -69,7 +69,11 @@ function Change({
     return <p className="text-sm text-gray-500">No previous data</p>;
   }
 
-  const direction = current > previous ? "up" : current < previous ? "down" : "same";
+  // A change too small to show (e.g. 7.37% → 7.41% is "0.0 pp") counts as no change,
+  // so we never show a green or red arrow next to "0.0".
+  const changeText = formatChange(current, previous, format);
+  const roundsToZero = parseFloat(changeText) === 0;
+  const direction = roundsToZero ? "same" : current > previous ? "up" : current < previous ? "down" : "same";
   // true = good news, false = bad news, null = no change, or neither direction is good or bad.
   const isBetter = direction === "same" || better === "neither" ? null : direction === better;
 
@@ -92,7 +96,7 @@ function Change({
       >
         <Icon aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={2.5} />
         <span className="sr-only">{spoken}</span>
-        {direction === "same" ? "0" : formatChange(current, previous, format)}
+        {direction === "same" ? "0" : changeText}
       </span>
       <span className="text-gray-500">vs previous period</span>
     </p>
